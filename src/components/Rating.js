@@ -3,53 +3,64 @@ Vue.component('coco-rating', {
   template: 
     '<div>\
       <div style="font-size:1.5em; color:#e64980">\
-        <span v-for="index in 5" class="fa-stack" @click="onClick(index)">\
+        <span v-for="index in maxScore" class="fa-stack" @mousemove="onMouseMove(index)" @mouseup="onMouseUp()" @mousedown="onMouseDown(index)" @dragstart="onDragStart()">\
           <i class="far fa-star fa-stack-1x"></i>\
           <i class="far fa-star fa-stack-1x"></i>\
         </span>\
       </div>\
     </div>',
     props: { 
-      count: {
+      score: {
+        type: Number,
+        required: true
+      },
+      maxScore: {
         type: Number,
         required: true
       }
     },
+    data: {
+      mouseFlag: false
+    },
     methods: {
-      onClick: function(index){
-        let currentCount = this.count
+      update: function(index){
+        let currentCount = this.score
 
-        if (index != currentCount) {
-          this.init(currentCount)
-        }
-
-        for (var i = 0; i < index; i++) {
+        for (var i = 0; i < this.maxScore; i++) {
           let star = this.$el.childNodes[0].children[i].children[0].classList
-
-          if (star.contains('fas')) { 
-            star.remove('fas')
-            star.add('far')
-          }
-          else { 
+          
+          if (i < index) {
             star.remove('far')
             star.add('fas')
           }
+          else {
+            star.remove('fas')
+            star.add('far')
+          }
         }
-        this.count = index
+
+        this.score = index
       },
-      init: function(currentCount){
-        for(var i = 0; i < currentCount; i++){
-          let currentStar = this.$el.childNodes[0].children[i].children[0].classList
-          
-          currentStar.remove('fas')
-          currentStar.add('far')
+      onMouseMove: function(index) {
+        if (this.mouseFlag) {
+          this.update(index)
         }
+      },
+      onMouseUp: function() {
+        this.mouseFlag = false
+      },
+      onMouseDown: function(index) {
+        this.mouseFlag = true
+        this.update(index)
+      },
+      onDragStart: function() {
+        event.preventDefault()
       }
     },
     mounted: function() {
-      let count = this.count
-      if (count > 0) {
-        this.onClick(count)
+      let score = this.score
+      if (score > 0) {
+        this.update(score)
       }
     }
 })
